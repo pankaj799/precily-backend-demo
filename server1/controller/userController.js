@@ -1,7 +1,7 @@
 require('dotenv').config()
 const User = require('../model/users');
-const  bcryptjs = require('bcryptjs');
-const  crypto = require('crypto');
+const bcryptjs = require('bcryptjs');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { format } = require('path');
 
@@ -11,37 +11,35 @@ const { format } = require('path');
 ///////////////// response time of this api is 593ms////////////
 exports.createUser = (req, res, next) => {
     // console.log(req.body)
-    const {name, username}= req.body;
-    User.findOne({username:username})
+    const { name, username } = req.body;
+    User.findOne({ username: username })
         .then(user => {
-            if(!user)
-            {
+            if (!user) {
                 const userdata = new User();
                 userdata.name = name;
                 userdata.username = username;
                 return userdata.save()
-                        .then(saved => {
-                            if(saved)
-                            {
-                                return res.status(200).send(JSON.stringify({ 
-                                    message: "Data Added",
-                                    data : user
-                                }))
-                            }
-                            return res.status(401).send(JSON.stringify({ 
-                                message: "Data not saved"
+                    .then(saved => {
+                        if (saved) {
+                            return res.status(200).send(JSON.stringify({
+                                message: "Data Added",
+                                data: user
                             }))
-                        })
-                
+                        }
+                        return res.status(401).send(JSON.stringify({
+                            message: "Data not saved"
+                        }))
+                    })
+
             }
-            else{
-                return res.status(401).send(JSON.stringify({ 
+            else {
+                return res.status(401).send(JSON.stringify({
                     message: "User Already Exist"
                 }))
             }
         })
         .catch(err => {
-            return res.status(500).send(JSON.stringify({ 
+            return res.status(500).send(JSON.stringify({
                 message: "Error Occured"
             }))
         })
@@ -50,30 +48,31 @@ exports.createUser = (req, res, next) => {
 ///////////////// api for updateing data and creating data with the help of upsert function //////////
 ///////////////// response time of this api is 377ms for update data////////////
 ///////////////// response time of this api is 523ms for create data////////////
-exports.updateData = (req, res, next) => {
+exports.updateData = async (req, res, next) => {
     // console.log(req.body)
-    const {name, username}= req.body;
-    User.findOneAndUpdate({username:username}, {name: name}, {upsert: true})
-        .then(updated => {
-            if(updated)
-            {
-                return res.status(200).send(JSON.stringify({ 
-                    message: "Data updated",
-                    data : updated
-                }))
-            }
-            else{
-                return res.status(200).send(JSON.stringify({ 
-                    message: "New Record added"
-                }))
-            }
-        })
-        .catch(err => {
-            console.log(err)
-            return res.status(500).send(JSON.stringify({ 
-                message: "Error Occured"
+    try {
+        const { name, username } = req.body;
+        const updatedUser = await User.findOneAndUpdate({ username: username }, { name: name }, { upsert: true })
+
+        if (updatedUser) {
+            return res.status(200).send(JSON.stringify({
+                message: "Data updatedUser",
+                data: updatedUser
             }))
-        })
+        }
+        else {
+            return res.status(200).send(JSON.stringify({
+                message: "New Record added"
+            }))
+        }
+
+    } catch (err) {
+        console.log(err)
+        return res.status(500).send(JSON.stringify({
+            message: "Error Occured"
+        }))
+    }
+
 }
 
 ///////////////// api for getting all data in collection //////////
@@ -82,22 +81,21 @@ exports.getUsers = (req, res, next) => {
     User.find()
 
         .then(data => {
-            if(data)
-            {
-                return res.status(200).send(JSON.stringify({ 
+            if (data) {
+                return res.status(200).send(JSON.stringify({
                     message: "All Data",
-                    data : data
+                    data: data
                 }))
             }
-            else{
-                return res.status(200).send(JSON.stringify({ 
+            else {
+                return res.status(200).send(JSON.stringify({
                     message: "No Record Found"
                 }))
             }
         })
         .catch(err => {
             console.log(err)
-            return res.status(500).send(JSON.stringify({ 
+            return res.status(500).send(JSON.stringify({
                 message: "Error Occured"
             }))
         })
