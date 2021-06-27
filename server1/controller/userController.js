@@ -55,22 +55,22 @@ exports.updateData = async (req, res, next) => {
         const updatedUser = await User.findOneAndUpdate({ username: username }, { name: name }, { upsert: true })
 
         if (updatedUser) {
-            return res.status(200).send(JSON.stringify({
+            return res.status(200).json({
                 message: "Data updatedUser",
                 data: updatedUser
-            }))
+            })
         }
         else {
-            return res.status(200).send(JSON.stringify({
+            return res.status(200).json({
                 message: "New Record added"
-            }))
+            })
         }
 
     } catch (err) {
         console.log(err)
-        return res.status(500).send(JSON.stringify({
+        return res.status(500).json({
             message: "Error Occured"
-        }))
+        })
     }
 
 }
